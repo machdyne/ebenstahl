@@ -27,19 +27,17 @@
 #include "tusb.h"
 
 #include "ebenstahl.h"
+#include "mapper.h"
 #include "drv_fram.h"
 
-// 8KB is the smallest size that windows allow to mount:
+// 8KB (512 * 16) is the smallest size that windows allow to mount:
 enum {
-  //DISK_BLOCK_NUM  = 2048,	// 512 * 2048 = 1MB (4 x 256KB mmods)
-  DISK_BLOCK_NUM  = 512,		// 512 * 512 = 256KB (1 x 256KB mmods / kaltstahl)
-  //DISK_BLOCK_NUM  = 16,		// 512 * 16 = 8KB (blaustahl)
   DISK_BLOCK_SIZE = 512
 };
 
 // Invoked to determine max LUN
 uint8_t tud_msc_get_maxlun_cb(void) {
-  return 1;	// number of LUNs
+  return mapper_luns();
 }
 
 // Invoked when received SCSI_CMD_INQUIRY
@@ -59,17 +57,13 @@ void tud_msc_inquiry_cb(uint8_t lun, uint8_t vendor_id[8], uint8_t product_id[16
 // Invoked when received Test Unit Ready command.
 // return true allowing host to read/write this LUN e.g SD card inserted
 bool tud_msc_test_unit_ready_cb(uint8_t lun) {
-  return true; // RAM disk is always ready
+  return true; // always ready
 }
 
 // Invoked when received SCSI_CMD_READ_CAPACITY_10 and SCSI_CMD_READ_FORMAT_CAPACITY to determine the disk size
 // Application update block count and block size
 void tud_msc_capacity_cb(uint8_t lun, uint32_t* block_count, uint16_t* block_size) {
-  (void) lun;
-
-	// XXX TODO: get size from mapper
-
-  *block_count = DISK_BLOCK_NUM;
+  *block_count = mapper_lun_size(lun) / DISK_BLOCK_SIZE;
   *block_size  = DISK_BLOCK_SIZE;
 }
 
@@ -94,12 +88,12 @@ bool tud_msc_start_stop_cb(uint8_t lun, uint8_t power_condition, bool start, boo
 // Callback invoked when received READ10 command.
 // Copy disk's data to buffer (up to bufsize) and return number of copied bytes.
 int32_t tud_msc_read10_cb(uint8_t lun, uint32_t lba, uint32_t offset, void* buffer, uint32_t bufsize) {
-  // out of ramdisk
-  if (lba >= DISK_BLOCK_NUM) return -1;
+  // out of space
+  if (lba >= (mapper_lun_size(lun) / DISK_BLOCK_SIZE)) return -1;
 
   uint32_t addr = (lba * DISK_BLOCK_SIZE) + offset;
-	// XXX TODO: get cs from mapper
-  fram_read(ES_CS0, buffer, addr, bufsize);
+  int cs = mapper_get_cs(lun, addr);
+  fram_read(cs, buffer, addr, bufsize);
 
   return (int32_t) bufsize;
 }
@@ -114,12 +108,15 @@ bool tud_msc_is_writable_cb(uint8_t lun) {
 // Callback invoked when received WRITE10 command.
 // Process data in buffer to disk's storage and return number of written bytes
 int32_t tud_msc_write10_cb(uint8_t lun, uint32_t lba, uint32_t offset, uint8_t* buffer, uint32_t bufsize) {
-  // out of ramdisk
-  if (lba >= DISK_BLOCK_NUM) return -1;
+  // out of space
+  if (lba >= (mapper_lun_size(lun) / DISK_BLOCK_SIZE)) return -1;
+
+  // write protect switch is on
+  if (es_wp_is_on()) return - 1;
 
   uint32_t addr = (lba * DISK_BLOCK_SIZE) + offset;
-	// XXX TODO: get cs from mapper
-  fram_write(ES_CS0, addr, buffer, bufsize);
+  int cs = mapper_get_cs(lun, addr);
+  fram_write(cs, addr, buffer, bufsize);
 
   return (int32_t) bufsize;
 }
