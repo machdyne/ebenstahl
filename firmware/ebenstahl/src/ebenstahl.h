@@ -6,6 +6,12 @@
 void es_init(void);
 bool es_wp_is_on(void);
 
+//#define EBENSTAHL
+
+#ifdef EBENSTAHL
+
+// ebenstahl
+
 #define ES_SPI		spi0
 
 #define ES_LEDR	6
@@ -40,5 +46,19 @@ bool es_wp_is_on(void);
 #define ES_DRV_FRAM		1
 #define ES_DRV_FLASH		2
 #define ES_DRV_EEPROM	3
+
+#else
+
+// blaustahl, kaltstahl, rosastahl, etc.
+
+#define ES_LED		9
+
+#define ES_SPI		spi1
+#define ES_MOSI	11
+#define ES_MISO	12
+#define ES_CS0		13
+#define ES_SCK		14
+
+#endif
 
 #endif

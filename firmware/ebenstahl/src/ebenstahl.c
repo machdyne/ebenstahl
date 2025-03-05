@@ -5,6 +5,8 @@
 
 void es_init(void) {
 
+#ifdef EBENSTAHL
+
 	// rgb led
 	gpio_init(ES_LEDR);
 	gpio_set_dir(ES_LEDR, true);
@@ -22,7 +24,7 @@ void es_init(void) {
 	gpio_set_dir(ES_WP, false);
 	gpio_set_pulls(ES_WP, true, false);
 
-	// spi bus
+	// chip selects
 	gpio_init(ES_CS0);
 	gpio_init(ES_CS1);
 	gpio_init(ES_CS2);
@@ -39,17 +41,6 @@ void es_init(void) {
 	gpio_init(ES_CS13);
 	gpio_init(ES_CS14);
 	gpio_init(ES_CS15);
-
-	gpio_init(ES_MISO);
-	gpio_init(ES_MOSI);
-	gpio_init(ES_SCK);
-
-	gpio_set_function(ES_MISO, GPIO_FUNC_SPI);
-	gpio_set_function(ES_MOSI, GPIO_FUNC_SPI);
-	gpio_set_function(ES_SCK, GPIO_FUNC_SPI);
-
-	gpio_set_dir(ES_MOSI, 1);
-	gpio_set_dir(ES_SCK, 1);
 
 	gpio_set_dir(ES_CS0, 1);
 	gpio_set_dir(ES_CS1, 1);
@@ -85,14 +76,40 @@ void es_init(void) {
 	gpio_put(ES_CS14, 1);
 	gpio_put(ES_CS15, 1);
 
+#else
+
+	gpio_init(ES_LED);
+	gpio_set_dir(ES_LED, true);
+	gpio_put(ES_LED, 1);
+
+	gpio_put(ES_CS0, 1);
+
+#endif
+
+	// spi bus
+
+	gpio_init(ES_MISO);
+	gpio_init(ES_MOSI);
+	gpio_init(ES_SCK);
+
+	gpio_set_function(ES_MISO, GPIO_FUNC_SPI);
+	gpio_set_function(ES_MOSI, GPIO_FUNC_SPI);
+	gpio_set_function(ES_SCK, GPIO_FUNC_SPI);
+
+	gpio_set_dir(ES_MOSI, 1);
+	gpio_set_dir(ES_SCK, 1);
+
 	spi_init(ES_SPI, 10000 * 1000);	// 10 MHz
 
 }
 
 bool es_wp_is_on(void) {
 
+#ifdef EBENSTAHL
 	bool wp = gpio_get(ES_WP);
-
 	return wp;
+#else
+	return false;
+#endif
 
 }
