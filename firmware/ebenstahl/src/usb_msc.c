@@ -31,8 +31,9 @@
 
 // 8KB is the smallest size that windows allow to mount:
 enum {
-  //DISK_BLOCK_NUM  = 2048,		// 512 * 2048 = 1MB (4 x 256KB mmods)
-  DISK_BLOCK_NUM  = 512,		// 512 * 512 = 256KB (1 x 256KB mmods)
+  //DISK_BLOCK_NUM  = 2048,	// 512 * 2048 = 1MB (4 x 256KB mmods)
+  DISK_BLOCK_NUM  = 512,		// 512 * 512 = 256KB (1 x 256KB mmods / kaltstahl)
+  //DISK_BLOCK_NUM  = 16,		// 512 * 16 = 8KB (blaustahl)
   DISK_BLOCK_SIZE = 512
 };
 

@@ -6,7 +6,7 @@
 void es_init(void);
 bool es_wp_is_on(void);
 
-//#define EBENSTAHL
+#define EBENSTAHL
 
 #ifdef EBENSTAHL
 
