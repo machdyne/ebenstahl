@@ -2,6 +2,8 @@
 
 Ebenstahl is a desktop storage controller with sockets for up to 16 [MMOD](https://github.com/machdyne/mmod) modules. When paired with FRAM or EEPROM MMODs, it can be used to build a long-term storage array.
 
+![Ebenstahl](https://github.com/machdyne/ebenstahl/blob/c97c9766c0a3bc06164430417d3006f85a538926/ebenstahl.png)
+
 This repo contains schematics, USB-MSC firmware and a 3D-printable case.
 
 Find more information on the [Ebenstahl product page](https://machdyne.com/product/ebenstahl-storage-device/).
