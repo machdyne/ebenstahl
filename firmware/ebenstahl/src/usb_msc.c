@@ -66,6 +66,8 @@ bool tud_msc_test_unit_ready_cb(uint8_t lun) {
 void tud_msc_capacity_cb(uint8_t lun, uint32_t* block_count, uint16_t* block_size) {
   (void) lun;
 
+	// XXX TODO: get size from mapper
+
   *block_count = DISK_BLOCK_NUM;
   *block_size  = DISK_BLOCK_SIZE;
 }
@@ -95,7 +97,7 @@ int32_t tud_msc_read10_cb(uint8_t lun, uint32_t lba, uint32_t offset, void* buff
   if (lba >= DISK_BLOCK_NUM) return -1;
 
   uint32_t addr = (lba * DISK_BLOCK_SIZE) + offset;
-	// XXX TODO get cs from mapper
+	// XXX TODO: get cs from mapper
   fram_read(ES_CS0, buffer, addr, bufsize);
 
   return (int32_t) bufsize;
@@ -115,7 +117,7 @@ int32_t tud_msc_write10_cb(uint8_t lun, uint32_t lba, uint32_t offset, uint8_t* 
   if (lba >= DISK_BLOCK_NUM) return -1;
 
   uint32_t addr = (lba * DISK_BLOCK_SIZE) + offset;
-	// XXX TODO get cs from mapper
+	// XXX TODO: get cs from mapper
   fram_write(ES_CS0, addr, buffer, bufsize);
 
   return (int32_t) bufsize;

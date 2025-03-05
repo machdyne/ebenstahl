@@ -82,6 +82,8 @@ void es_init(void) {
 	gpio_set_dir(ES_LED, true);
 	gpio_put(ES_LED, 1);
 
+	gpio_init(ES_CS0);
+	gpio_set_dir(ES_CS0, 1);
 	gpio_put(ES_CS0, 1);
 
 #endif
