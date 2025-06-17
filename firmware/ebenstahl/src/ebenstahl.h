@@ -6,7 +6,7 @@
 void es_init(void);
 bool es_wp_is_on(void);
 
-//#define EBENSTAHL
+#define EBENSTAHL
 
 #define ES_DRV_NONE		0
 #define ES_DRV_FRAM		1
