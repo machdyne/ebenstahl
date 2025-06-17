@@ -21,6 +21,10 @@ target_include_directories(ebenstahl PUBLIC
 
 pico_sdk_init()
 
+target_compile_definitions(ebenstahl PUBLIC
+   PICO_XOSC_STARTUP_DELAY_MULTIPLIER=64
+   )
+
 target_link_libraries(ebenstahl PRIVATE pico_stdlib hardware_resets hardware_irq hardware_spi tinyusb_device)
 
 pico_add_extra_outputs(ebenstahl)

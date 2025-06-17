@@ -13,29 +13,47 @@ const int es_map[16][4] = {
 #ifdef EBENSTAHL
 
 	// CS			LUN	DRIVER			SIZE
-	{ ES_CS0,	0,		ES_DRV_FRAM,	262144 },
-	{ ES_CS1,	0,		ES_DRV_FRAM,	262144 },
-	{ ES_CS2,	0,		ES_DRV_FRAM,	262144 },
-	{ ES_CS3,	0,		ES_DRV_FRAM,	262144 },
+	{ ES_CS0,	0,		ES_DRV_FRAM,	524288 },
+	{ ES_CS1,	0,		ES_DRV_FRAM,	524288 },
+	{ ES_CS2,	0,		ES_DRV_FRAM,	524288 },
+	{ ES_CS3,	0,		ES_DRV_FRAM,	524288 },
 
-	{ 0, -1, 0, 0 },
-	{ 0, -1, 0, 0 },
-	{ 0, -1, 0, 0 },
-	{ 0, -1, 0, 0 },
+	{ ES_CS4,	0,		ES_DRV_FRAM,	524288 },
+	{ ES_CS5,	0,		ES_DRV_FRAM,	524288 },
+	{ ES_CS6,	0,		ES_DRV_FRAM,	524288 },
+	{ ES_CS7,	0,		ES_DRV_FRAM,	524288 },
 
-	{ 0, -1, 0, 0 },
-	{ 0, -1, 0, 0 },
-	{ 0, -1, 0, 0 },
-	{ 0, -1, 0, 0 },
+	{ ES_CS8,	0,		ES_DRV_FRAM,	524288 },
+	{ ES_CS9,	0,		ES_DRV_FRAM,	524288 },
+	{ ES_CS10,	0,		ES_DRV_FRAM,	524288 },
+	{ ES_CS11,	0,		ES_DRV_FRAM,	524288 },
 
-	{ 0, -1, 0, 0 },
-	{ 0, -1, 0, 0 },
-	{ 0, -1, 0, 0 },
-	{ 0, -1, 0, 0 },
+	{ ES_CS12,	0,		ES_DRV_FRAM,	524288 },
+	{ ES_CS13,	0,		ES_DRV_FRAM,	524288 },
+	{ ES_CS14,	0,		ES_DRV_FRAM,	524288 },
+	{ ES_CS15,	0,		ES_DRV_FRAM,	524288 },
 
 #else
 
 	{ ES_CS0,	0,		ES_DRV_FRAM,	262144 },
+	{ 0, -1, 0, 0 },
+	{ 0, -1, 0, 0 },
+	{ 0, -1, 0, 0 },
+
+	{ 0, -1, 0, 0 },
+	{ 0, -1, 0, 0 },
+	{ 0, -1, 0, 0 },
+	{ 0, -1, 0, 0 },
+
+	{ 0, -1, 0, 0 },
+	{ 0, -1, 0, 0 },
+	{ 0, -1, 0, 0 },
+	{ 0, -1, 0, 0 },
+
+	{ 0, -1, 0, 0 },
+	{ 0, -1, 0, 0 },
+	{ 0, -1, 0, 0 },
+	{ 0, -1, 0, 0 },
 
 #endif
 

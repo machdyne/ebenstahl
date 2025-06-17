@@ -6,7 +6,12 @@
 void es_init(void);
 bool es_wp_is_on(void);
 
-#define EBENSTAHL
+//#define EBENSTAHL
+
+#define ES_DRV_NONE		0
+#define ES_DRV_FRAM		1
+#define ES_DRV_FLASH		2
+#define ES_DRV_EEPROM	3
 
 #ifdef EBENSTAHL
 
@@ -41,11 +46,6 @@ bool es_wp_is_on(void);
 #define ES_CS10	27
 #define ES_CS9		28
 #define ES_CS8		29
-
-#define ES_DRV_NONE		0
-#define ES_DRV_FRAM		1
-#define ES_DRV_FLASH		2
-#define ES_DRV_EEPROM	3
 
 #else
 
