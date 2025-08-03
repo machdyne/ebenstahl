@@ -99,10 +99,10 @@ module ssz_case_top() {
 			translate([50-4, 100-4, -14]) cylinder(d=3.5, h=40);
 
 			// flush mount bolt holes
-			translate([4, 4, top_height-1.5]) cylinder(d=5.25, h=4);
-			translate([4, 100-4, top_height-1.5]) cylinder(d=5.25, h=4);
-			translate([50-4, 4, top_height-1.5]) cylinder(d=5.25, h=4);
-			translate([50-4, 100-4, top_height-1.5]) cylinder(d=5.25, h=4);
+			translate([4, 4, top_height-1.75]) cylinder(d=6, h=4);
+			translate([4, 100-4, top_height-1.75]) cylinder(d=6, h=4);
+			translate([50-4, 4, top_height-1.75]) cylinder(d=6, h=4);
+			translate([50-4, 100-4, top_height-1.75]) cylinder(d=6, h=4);
 
 
 		}

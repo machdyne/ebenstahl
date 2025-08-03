@@ -12,7 +12,14 @@ Find more information on the [Ebenstahl product page](https://machdyne.com/produ
 
 The firmware is under development and all features aren't yet supported.
 
-To use this firmware with Kaltstahl or Blaustahl you will need to comment out the EBENSTAHL definition in ebenstahl.h. For Blaustahl will you also need to comment out FRAM\_BIG in drv\_fram.c and change the size in mapper.c.
+### Supported Boards
+
+ * [Ebenstahl](https://machdyne.com/product/ebenstahl-storage-device/)
+ * [Graustahl](https://machdyne.com/product/graustahl-storage-device/)
+ * [Kaltstahl](https://machdyne.com/product/kaltstahl-storage-device/)
+ * [Blaustahl](https://machdyne.com/product/blaustahl-storage-device/)
+
+To use this firmware with Graustahl, Kaltstahl or Blaustahl you will need to comment out the EBENSTAHL definition in ebenstahl.h. For Blaustahl will you also need to comment out FRAM\_BIG in drv\_fram.c and change the size in mapper.c.
 
 You can build the firmware from source, if you have [pico-sdk](https://github.com/raspberrypi/pico-sdk) installed:
 

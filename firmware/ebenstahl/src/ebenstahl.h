@@ -7,6 +7,8 @@ void es_init(void);
 bool es_wp_is_on(void);
 
 #define EBENSTAHL
+//#define GRAUSTAHL
+//#define KALTSTAHL
 
 #define ES_DRV_NONE		0
 #define ES_DRV_FRAM		1
@@ -47,9 +49,26 @@ bool es_wp_is_on(void);
 #define ES_CS9		28
 #define ES_CS8		29
 
+#elif GRAUSTAHL
+
+#define ES_SPI		spi0
+
+#define ES_LEDR	6
+#define ES_LEDG	4
+#define ES_LEDB	2
+
+#define ES_CS3		23
+#define ES_CS2		25
+#define ES_CS1		24
+#define ES_CS0		17
+
+#define ES_SCK		18
+#define ES_MOSI	19
+#define ES_MISO	20
+
 #else
 
-// blaustahl, kaltstahl, rosastahl, etc.
+// blaustahl, kaltstahl, rosastahl
 
 #define ES_LED		9
 
@@ -61,4 +80,4 @@ bool es_wp_is_on(void);
 
 #endif
 
-#endif
+#endif	// _EBENSTAHL_H_
