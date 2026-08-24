@@ -107,7 +107,7 @@ void led_blinking_task(void) {
 	if ((time_us_32() / 1000) - start_ms < blink_interval_ms) return; // not enough time
 	start_ms += blink_interval_ms;
 
-#ifdef EBENSTAHL
+#if defined(EBENSTAHL) || defined(GRAUSTAHL)
 	gpio_put(ES_LEDG, led_state);
 #else
 	gpio_put(ES_LED, led_state);
