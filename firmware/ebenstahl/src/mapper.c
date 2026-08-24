@@ -83,26 +83,72 @@ int mapper_lun_size(uint8_t lun) {
 
 }
 
+// Returns the map entry index that owns the given LUN-absolute address,
+// or -1 if not found.
 int mapper_rec(uint8_t lun, uint32_t addr) {
 
 	uint32_t p = 0;
 
 	for (int i = 0; i < 16; i++) {
 		if (es_map[i][1] == lun) {
-			if (addr >= p && addr <= p + es_map[i][3] - 1)
+			uint32_t entry_end = p + (uint32_t)es_map[i][3];
+			if (addr >= p && addr < entry_end)
 				return i;
-			p += es_map[i][3];
+			p = entry_end;
 		}
 	}
+
+	return -1;
+
+}
+
+// Returns how many bytes remain in the current chip from addr onwards.
+// Used by callers to split transfers at chip boundaries.
+int mapper_remaining(uint8_t lun, uint32_t addr) {
+
+	uint32_t p = 0;
+
+	for (int i = 0; i < 16; i++) {
+		if (es_map[i][1] == lun) {
+			uint32_t entry_end = p + (uint32_t)es_map[i][3];
+			if (addr >= p && addr < entry_end)
+				return (int)(entry_end - addr);
+			p = entry_end;
+		}
+	}
+
+	return 0;
+
+}
+
+// Translates a LUN-absolute address to a chip-local address.
+uint32_t mapper_get_local_addr(uint8_t lun, uint32_t addr) {
+
+	uint32_t p = 0;
+
+	for (int i = 0; i < 16; i++) {
+		if (es_map[i][1] == lun) {
+			uint32_t entry_end = p + (uint32_t)es_map[i][3];
+			if (addr >= p && addr < entry_end)
+				return addr - p;
+			p = entry_end;
+		}
+	}
+
+	return 0;
 
 }
 
 // given a LUN and address, return the correct driver
 int mapper_get_drv(uint8_t lun, uint32_t addr) {
-	return es_map[mapper_rec(lun, addr)][2];
+	int rec = mapper_rec(lun, addr);
+	if (rec < 0) return ES_DRV_NONE;
+	return es_map[rec][2];
 }
 
 // given a LUN and address, return the correct chip select
 int mapper_get_cs(uint8_t lun, uint32_t addr) {
-	return es_map[mapper_rec(lun, addr)][0];
+	int rec = mapper_rec(lun, addr);
+	if (rec < 0) return -1;
+	return es_map[rec][0];
 }

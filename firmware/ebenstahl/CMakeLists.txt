@@ -11,6 +11,8 @@ target_sources(ebenstahl PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/src/ebenstahl.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/mapper.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/drv_fram.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/drv_eeprom.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/drv_flash.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/usb_msc.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/usb_descriptors.c
   )

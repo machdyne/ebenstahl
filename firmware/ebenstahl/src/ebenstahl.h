@@ -52,6 +52,8 @@ bool es_wp_is_on(void);
 
 #elif defined(GRAUSTAHL)
 
+// graustahl
+
 #define ES_SPI		spi0
 
 #define ES_LEDR	6

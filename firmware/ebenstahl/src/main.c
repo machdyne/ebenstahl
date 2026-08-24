@@ -33,6 +33,8 @@
 
 #include "ebenstahl.h"
 #include "drv_fram.h"
+#include "drv_eeprom.h"
+#include "drv_flash.h"
 
 //--------------------------------------------------------------------+
 // MACRO CONSTANT TYPEDEF PROTYPES
@@ -58,6 +60,8 @@ int main(void) {
 
 	es_init();
 	fram_init();
+	eeprom_init();
+	flash_init();
 
 	// init device stack on configured roothub port
 	tud_init(BOARD_TUD_RHPORT);

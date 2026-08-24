@@ -5,7 +5,7 @@
 
 void es_init(void) {
 
-#ifdef EBENSTAHL
+#if defined(EBENSTAHL)
 
 	// rgb led
 	gpio_init(ES_LEDR);
@@ -75,6 +75,36 @@ void es_init(void) {
 	gpio_put(ES_CS13, 1);
 	gpio_put(ES_CS14, 1);
 	gpio_put(ES_CS15, 1);
+
+#elif defined(GRAUSTAHL)
+
+	// rgb led
+	gpio_init(ES_LEDR);
+	gpio_set_dir(ES_LEDR, true);
+	gpio_init(ES_LEDG);
+	gpio_set_dir(ES_LEDG, true);
+	gpio_init(ES_LEDB);
+	gpio_set_dir(ES_LEDB, true);
+
+	gpio_put(ES_LEDR, 1);
+	gpio_put(ES_LEDG, 1);
+	gpio_put(ES_LEDB, 1);
+
+	// chip selects
+	gpio_init(ES_CS0);
+	gpio_init(ES_CS1);
+	gpio_init(ES_CS2);
+	gpio_init(ES_CS3);
+
+	gpio_set_dir(ES_CS0, 1);
+	gpio_set_dir(ES_CS1, 1);
+	gpio_set_dir(ES_CS2, 1);
+	gpio_set_dir(ES_CS3, 1);
+
+	gpio_put(ES_CS0, 1);
+	gpio_put(ES_CS1, 1);
+	gpio_put(ES_CS2, 1);
+	gpio_put(ES_CS3, 1);
 
 #else
 
