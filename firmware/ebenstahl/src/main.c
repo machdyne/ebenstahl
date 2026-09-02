@@ -32,6 +32,8 @@
 #include "tusb.h"
 
 #include "ebenstahl.h"
+#include "usb_msc.h"
+#include "led.h"
 #include "drv_fram.h"
 #include "drv_eeprom.h"
 #include "drv_flash.h"
@@ -40,25 +42,11 @@
 // MACRO CONSTANT TYPEDEF PROTYPES
 //--------------------------------------------------------------------+
 
-/* Blink pattern
- * - 250 ms  : device not mounted
- * - 1000 ms : device mounted
- * - 2500 ms : device is suspended
- */
-enum {
-  BLINK_NOT_MOUNTED = 250,
-  BLINK_MOUNTED = 1000,
-  BLINK_SUSPENDED = 2500,
-};
-
-static uint32_t blink_interval_ms = BLINK_NOT_MOUNTED;
-
-void led_blinking_task(void);
-
 /*------------- MAIN -------------*/
 int main(void) {
 
 	es_init();
+	led_init();
 	fram_init();
 	eeprom_init();
 	flash_init();
@@ -68,7 +56,7 @@ int main(void) {
 
 	while (1) {
 		tud_task(); // tinyusb device task
-		led_blinking_task();
+		led_task();
 	}
 
 }
@@ -79,12 +67,15 @@ int main(void) {
 
 // Invoked when device is mounted
 void tud_mount_cb(void) {
-  blink_interval_ms = BLINK_MOUNTED;
+  // a fresh enumeration re-inserts the medium on every LUN, so that
+  // replugging the device recovers from a host-initiated eject
+  usb_msc_reset_eject();
+  led_set_link(LED_LINK_MOUNTED);
 }
 
 // Invoked when device is unmounted
 void tud_umount_cb(void) {
-  blink_interval_ms = BLINK_NOT_MOUNTED;
+  led_set_link(LED_LINK_UNMOUNTED);
 }
 
 // Invoked when usb bus is suspended
@@ -92,30 +83,10 @@ void tud_umount_cb(void) {
 // Within 7ms, device must draw an average of current less than 2.5 mA from bus
 void tud_suspend_cb(bool remote_wakeup_en) {
   (void) remote_wakeup_en;
-  blink_interval_ms = BLINK_SUSPENDED;
+  led_set_link(LED_LINK_SUSPENDED);
 }
 
 // Invoked when usb bus is resumed
 void tud_resume_cb(void) {
-  blink_interval_ms = tud_mounted() ? BLINK_MOUNTED : BLINK_NOT_MOUNTED;
-}
-
-//--------------------------------------------------------------------+
-// BLINKING TASK
-//--------------------------------------------------------------------+
-void led_blinking_task(void) {
-	static uint64_t start_ms = 0;
-	static bool led_state = false;
-
-// Blink every interval ms
-	if ((time_us_32() / 1000) - start_ms < blink_interval_ms) return; // not enough time
-	start_ms += blink_interval_ms;
-
-#if defined(EBENSTAHL) || defined(GRAUSTAHL)
-	gpio_put(ES_LEDG, led_state);
-#else
-	gpio_put(ES_LED, led_state);
-#endif
-
-	led_state = 1 - led_state; // toggle
+  led_set_link(tud_mounted() ? LED_LINK_MOUNTED : LED_LINK_UNMOUNTED);
 }

@@ -7,17 +7,7 @@ void es_init(void) {
 
 #if defined(EBENSTAHL)
 
-	// rgb led
-	gpio_init(ES_LEDR);
-	gpio_set_dir(ES_LEDR, true);
-	gpio_init(ES_LEDG);
-	gpio_set_dir(ES_LEDG, true);
-	gpio_init(ES_LEDB);
-	gpio_set_dir(ES_LEDB, true);
-
-	gpio_put(ES_LEDR, 1);
-	gpio_put(ES_LEDG, 1);
-	gpio_put(ES_LEDB, 1);
+	// the rgb led is owned by led.c
 
 	// write protect switch
 	gpio_init(ES_WP);
@@ -78,17 +68,7 @@ void es_init(void) {
 
 #elif defined(GRAUSTAHL)
 
-	// rgb led
-	gpio_init(ES_LEDR);
-	gpio_set_dir(ES_LEDR, true);
-	gpio_init(ES_LEDG);
-	gpio_set_dir(ES_LEDG, true);
-	gpio_init(ES_LEDB);
-	gpio_set_dir(ES_LEDB, true);
-
-	gpio_put(ES_LEDR, 1);
-	gpio_put(ES_LEDG, 1);
-	gpio_put(ES_LEDB, 1);
+	// the rgb led is owned by led.c
 
 	// chip selects
 	gpio_init(ES_CS0);
@@ -108,9 +88,7 @@ void es_init(void) {
 
 #else
 
-	gpio_init(ES_LED);
-	gpio_set_dir(ES_LED, true);
-	gpio_put(ES_LED, 1);
+	// the led is owned by led.c
 
 	gpio_init(ES_CS0);
 	gpio_set_dir(ES_CS0, 1);

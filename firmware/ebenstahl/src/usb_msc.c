@@ -28,6 +28,7 @@
 
 #include "ebenstahl.h"
 #include "mapper.h"
+#include "led.h"
 #include "drv_fram.h"
 #include "drv_eeprom.h"
 #include "drv_flash.h"
@@ -36,6 +37,41 @@
 enum {
   DISK_BLOCK_SIZE = 512
 };
+
+// the mapper table has 16 entries, so LUN ids are in the range 0..15
+#define ES_MAX_LUN 16
+
+// Medium presence, tracked per LUN.
+//
+// The host ejects a LUN by sending START STOP UNIT with LoEj=1 and Start=0.
+// If we keep reporting the medium as present after that, Linux and macOS
+// simply rescan the LUN and re-mount it, which is why an eject appeared to
+// have no effect. Once a LUN is marked ejected we report MEDIUM NOT PRESENT
+// until the host explicitly loads it again or the device is re-enumerated.
+static bool es_ejected[ES_MAX_LUN];
+
+static inline bool es_lun_ejected(uint8_t lun) {
+  return (lun < ES_MAX_LUN) ? es_ejected[lun] : false;
+}
+
+// Re-insert the medium on every LUN. Called from tud_mount_cb() so that
+// unplugging and replugging the device undoes a previous eject.
+void usb_msc_reset_eject(void) {
+  for (int i = 0; i < ES_MAX_LUN; i++) es_ejected[i] = false;
+  led_set_medium(LED_MEDIUM_PRESENT);
+}
+
+// any LUN still holding a medium counts as present; only LUNs the mapper
+// actually defines get a vote, otherwise the unused slots (which are never
+// ejected) would keep the medium looking present forever
+static void es_update_medium_led(void) {
+  int luns = mapper_luns();
+  if (luns > ES_MAX_LUN) luns = ES_MAX_LUN;
+  for (int i = 0; i < luns; i++) {
+    if (!es_ejected[i]) { led_set_medium(LED_MEDIUM_PRESENT); return; }
+  }
+  led_set_medium(LED_MEDIUM_EJECTED);
+}
 
 // Invoked to determine max LUN
 uint8_t tud_msc_get_maxlun_cb(void) {
@@ -59,7 +95,15 @@ void tud_msc_inquiry_cb(uint8_t lun, uint8_t vendor_id[8], uint8_t product_id[16
 // Invoked when received Test Unit Ready command.
 // return true allowing host to read/write this LUN e.g SD card inserted
 bool tud_msc_test_unit_ready_cb(uint8_t lun) {
-  return true; // always ready
+
+  // an ejected LUN must report as empty, otherwise the host re-mounts it
+  if (es_lun_ejected(lun)) {
+    tud_msc_set_sense(lun, SCSI_SENSE_NOT_READY, 0x3A, 0x00); // medium not present
+    return false;
+  }
+
+  return true; // ready
+
 }
 
 // Invoked when received SCSI_CMD_READ_CAPACITY_10 and SCSI_CMD_READ_FORMAT_CAPACITY to determine the disk size
@@ -73,15 +117,24 @@ void tud_msc_capacity_cb(uint8_t lun, uint32_t* block_count, uint16_t* block_siz
 // - Start = 0 : stopped power mode, if load_eject = 1 : unload disk storage
 // - Start = 1 : active mode, if load_eject = 1 : load disk storage
 bool tud_msc_start_stop_cb(uint8_t lun, uint8_t power_condition, bool start, bool load_eject) {
-  (void) lun;
   (void) power_condition;
 
+  if (lun >= ES_MAX_LUN) {
+    led_note_fault();
+    return false;
+  }
+
+  // a plain start/stop only changes the power condition; the medium is only
+  // loaded or unloaded when LoEj is set
   if (load_eject) {
     if (start) {
       // load disk storage
+      es_ejected[lun] = false;
     } else {
       // unload disk storage
+      es_ejected[lun] = true;
     }
+    es_update_medium_led();
   }
 
   return true;
@@ -92,11 +145,19 @@ bool tud_msc_start_stop_cb(uint8_t lun, uint8_t power_condition, bool start, boo
 // Handles transfers that may span multiple chips by splitting into per-chip chunks.
 int32_t tud_msc_read10_cb(uint8_t lun, uint32_t lba, uint32_t offset, void* buffer, uint32_t bufsize) {
 
+  // medium has been ejected
+  if (es_lun_ejected(lun)) {
+    tud_msc_set_sense(lun, SCSI_SENSE_NOT_READY, 0x3A, 0x00);
+    led_note_fault();
+    return -1;
+  }
+
   uint32_t lun_size = (uint32_t) mapper_lun_size(lun);
 
   // out of space
   if (lba >= (lun_size / DISK_BLOCK_SIZE)) {
     tud_msc_set_sense(lun, SCSI_SENSE_ILLEGAL_REQUEST, 0x21, 0x00);
+    led_note_fault();
     return -1;
   }
 
@@ -109,6 +170,7 @@ int32_t tud_msc_read10_cb(uint8_t lun, uint32_t lba, uint32_t offset, void* buff
     int rec = mapper_rec(lun, lun_addr);
     if (rec < 0) {
       tud_msc_set_sense(lun, SCSI_SENSE_ILLEGAL_REQUEST, 0x21, 0x00);
+      led_note_fault();
       return -1;
     }
 
@@ -138,6 +200,8 @@ int32_t tud_msc_read10_cb(uint8_t lun, uint32_t lba, uint32_t offset, void* buff
 
   }
 
+  led_note_activity();
+
   return (int32_t) bufsize;
 }
 
@@ -153,16 +217,27 @@ bool tud_msc_is_writable_cb(uint8_t lun) {
 // Handles transfers that may span multiple chips by splitting into per-chip chunks.
 int32_t tud_msc_write10_cb(uint8_t lun, uint32_t lba, uint32_t offset, uint8_t* buffer, uint32_t bufsize) {
 
+  // medium has been ejected
+  if (es_lun_ejected(lun)) {
+    tud_msc_set_sense(lun, SCSI_SENSE_NOT_READY, 0x3A, 0x00);
+    led_note_fault();
+    return -1;
+  }
+
   uint32_t lun_size = (uint32_t) mapper_lun_size(lun);
 
   // out of space
   if (lba >= (lun_size / DISK_BLOCK_SIZE)) {
     tud_msc_set_sense(lun, SCSI_SENSE_ILLEGAL_REQUEST, 0x21, 0x00);
+    led_note_fault();
     return -1;
   }
 
   // write protect switch is on
-  if (es_wp_is_on()) return -1;
+  if (es_wp_is_on()) {
+    led_note_fault();
+    return -1;
+  }
 
   uint32_t lun_addr = (lba * DISK_BLOCK_SIZE) + offset;
   uint32_t remaining = bufsize;
@@ -173,6 +248,7 @@ int32_t tud_msc_write10_cb(uint8_t lun, uint32_t lba, uint32_t offset, uint8_t* 
     int rec = mapper_rec(lun, lun_addr);
     if (rec < 0) {
       tud_msc_set_sense(lun, SCSI_SENSE_ILLEGAL_REQUEST, 0x21, 0x00);
+      led_note_fault();
       return -1;
     }
 
@@ -201,6 +277,8 @@ int32_t tud_msc_write10_cb(uint8_t lun, uint32_t lba, uint32_t offset, uint8_t* 
     remaining -= chunk;
 
   }
+
+  led_note_activity();
 
   return (int32_t) bufsize;
 }

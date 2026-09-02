@@ -35,7 +35,7 @@ const int es_map[16][4] = {
 
 #else
 
-	{ ES_CS0,	0,		ES_DRV_FRAM,	262144 },
+	{ ES_CS0,	0,		ES_DRV_FRAM,	524288 },
 	{ 0, -1, 0, 0 },
 	{ 0, -1, 0, 0 },
 	{ 0, -1, 0, 0 },

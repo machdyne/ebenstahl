@@ -11,6 +11,12 @@ bool es_wp_is_on(void);
 //#define KALTSTAHL
 //#define BLAUSTAHL
 
+// boards with an RGB LED define ES_HAS_RGB_LED; the rest have a single LED
+// on ES_LED. All LEDs are common anode (active low) -- confirmed against the
+// Ebenstahl schematic (D2 LED_RGB_ANODE, anode to PWR3V3 via 536R per
+// cathode). Unverified for the single-LED boards.
+#define ES_LED_ACTIVE_LOW	1
+
 #define ES_DRV_NONE		0
 #define ES_DRV_FRAM		1
 #define ES_DRV_FLASH		2
@@ -21,6 +27,8 @@ bool es_wp_is_on(void);
 // ebenstahl
 
 #define ES_SPI		spi0
+
+#define ES_HAS_RGB_LED
 
 #define ES_LEDR	6
 #define ES_LEDG	4
@@ -55,6 +63,8 @@ bool es_wp_is_on(void);
 // graustahl
 
 #define ES_SPI		spi0
+
+#define ES_HAS_RGB_LED
 
 #define ES_LEDR	6
 #define ES_LEDG	4
